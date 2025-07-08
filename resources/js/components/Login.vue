@@ -1,10 +1,34 @@
 <template>
-  <div class="login">
-    <h2>Login</h2>
-    <form @submit.prevent="login">
-      <input v-model="cpf" type="text" placeholder="CPF ou CNPJ" />
-      <button type="submit">Entrar</button>
-    </form>
+  <div class="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+    <div class="w-full max-w-sm bg-gray-800 p-8 rounded-2xl shadow-lg animate-fade-in">
+      <h2 class="text-2xl font-semibold text-green-400 text-center mb-6">Entrar no Chat</h2>
+      <form @submit.prevent="login" class="space-y-4">
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-green-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 11c0 0-4-1.5-4-4s1.79-3 4-3 4 1.5 4 4-4 4-4 4zm0 0c-2.5 0-8 1.5-8 4v3h16v-3c0-2.5-5.5-4-8-4z" />
+            </svg>
+          </span>
+          <input
+            v-model="cpf"
+            type="text"
+            placeholder="CPF ou CNPJ"
+            class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition-colors duration-300"
+        >
+          Entrar
+        </button>
+      </form>
+
+      <p v-if="error" class="text-red-400 text-center mt-4">{{ error }}</p>
+    </div>
   </div>
 </template>
 
@@ -15,6 +39,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const cpf = ref('')
+const error = ref('')
 
 const login = async () => {
   try {
@@ -22,7 +47,24 @@ const login = async () => {
     localStorage.setItem('token', response.data.token)
     router.push('/home')
   } catch (err) {
-    alert('Erro ao logar')
+    error.value = 'CPF ou CNPJ inválido'
   }
 }
 </script>
+
+<style>
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+</style>
