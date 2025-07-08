@@ -39,7 +39,7 @@
           >
             <option disabled value="">Selecione</option>
             <option value="pre">Pré-pago</option>
-            <option value="pos">Pós-pago</option>
+            <option value="post">Pós-pago</option>
           </select>
         </div>
 
@@ -53,6 +53,7 @@
 
       <p v-if="success" class="text-green-400 text-center mt-4">Cliente criado com sucesso!</p>
       <p v-if="error" class="text-red-400 text-center mt-4">{{ error }}</p>
+
     </div>
   </div>
 </template>
@@ -94,5 +95,9 @@ const createClient = async () => {
   } catch (err) {
     error.value = err?.response?.data?.message || 'Erro ao criar cliente.'
   }
+}
+
+const goToLogin = () => {
+  router.push('/login')
 }
 </script>
