@@ -54,7 +54,7 @@ const error = ref('')
 
 const login = async () => {
   try {
-    const response = await axios.post('/api/auth/login', { cpf_cnpj: cpf.value })
+    const response = await axios.post('/auth/login', { cpf_cnpj: cpf.value })
     localStorage.setItem('token', response.data.token)
     router.push('/home')
   } catch (err) {

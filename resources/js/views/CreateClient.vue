@@ -81,7 +81,7 @@ const createClient = async () => {
   }
 
   try {
-    await axios.post('/api/clients/', {
+    await axios.post('/clients/', {
       name: name.value,
       cpf_cnpj: cpf.value,
       email: email.value,

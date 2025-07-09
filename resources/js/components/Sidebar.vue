@@ -4,26 +4,80 @@
 
     <ul class="space-y-2 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-green-700/30 scrollbar-track-transparent">
       <li
-        v-for="contact in contacts"
-        :key="contact.id"
+        v-for="conversation in conversations"
+        :key="conversation.id"
+        @click="goToConversation(conversation.id)"
         class="p-3 rounded-lg cursor-pointer hover:bg-green-500/10 transition"
       >
-        {{ contact.name }}
+        {{ conversation.name }}
       </li>
     </ul>
 
-    <button
-      class="mt-4 bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg text-sm transition duration-300 shadow"
-    >
-      Nova conversa
-    </button>
+    <div class="mt-4">
+      <input
+        v-model="cpf"
+        placeholder="Digite o CPF"
+        class="bg-[#1a1e1f] text-sm text-white p-2 rounded w-full mb-2 border border-green-600 focus:outline-none"
+      />
+      <button
+        @click="startConversation"
+        class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg text-sm transition duration-300 shadow w-full"
+      >
+        Nova conversa
+      </button>
+      <p v-if="error" class="text-red-400 text-sm mt-1">{{ error }}</p>
+    </div>
   </aside>
 </template>
 
 <script setup>
-const contacts = [
-  { id: 1, name: 'Suporte' },
-  { id: 2, name: 'Fulano' },
-  { id: 3, name: 'Thales Backend' },
-]
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from '../axios'
+
+const conversations = ref([])
+const cpf = ref('')
+const error = ref('')
+const router = useRouter()
+
+const fetchConversations = async () => {
+  try {
+    const res = await axios.get('/conversations/')
+    conversations.value = res.data
+  } catch (e) {
+    console.error('Erro ao buscar conversas:', e)
+  }
+}
+
+const startConversation = async () => {
+  error.value = ''
+  if (!cpf.value) {
+    error.value = 'CPF é obrigatório'
+    return
+  }
+
+  try {
+    const res = await axios.post('/conversations/start', {
+      cpf_cnpj: cpf.value,
+    })
+
+    conversations.value.push({
+      id: res.data.conversation_id,
+      name: `Conversa com ${cpf.value}`,
+    })
+
+    router.push(`/chat/${res.data.conversation_id}`)
+  } catch (e) {
+    error.value =
+      e?.response?.data?.message || 'Erro ao iniciar conversa'
+  }
+}
+
+const goToConversation = (id) => {
+  router.push(`/chat/${id}`)
+}
+
+onMounted(() => {
+  fetchConversations()
+})
 </script>
