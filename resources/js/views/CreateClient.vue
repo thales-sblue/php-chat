@@ -23,24 +23,12 @@
         </div>
 
         <div>
-          <label class="block text-sm text-gray-300 mb-1">E-mail</label>
+          <label class="block text-sm text-gray-300 mb-1">Telefone</label>
           <input
-            v-model="email"
-            type="email"
+            v-model="phone"
+            type="text"
             class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
           />
-        </div>
-
-        <div>
-          <label class="block text-sm text-gray-300 mb-1">Tipo de Plano</label>
-          <select
-            v-model="type"
-            class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            <option disabled value="">Selecione</option>
-            <option value="pre">Pré-pago</option>
-            <option value="post">Pós-pago</option>
-          </select>
         </div>
 
         <button
@@ -53,7 +41,6 @@
 
       <p v-if="success" class="text-green-400 text-center mt-4">Cliente criado com sucesso!</p>
       <p v-if="error" class="text-red-400 text-center mt-4">{{ error }}</p>
-
     </div>
   </div>
 </template>
@@ -64,10 +51,10 @@ import axios from '../axios'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
 const name = ref('')
 const cpf = ref('')
-const email = ref('')
-const type = ref('')
+const phone = ref('')
 const error = ref('')
 const success = ref(false)
 
@@ -75,17 +62,19 @@ const createClient = async () => {
   error.value = ''
   success.value = false
 
-  if (!name.value || !cpf.value || !email.value || !type.value) {
+  if (!name.value || !cpf.value || !phone.value) {
     error.value = 'Todos os campos são obrigatórios.'
     return
   }
 
   try {
-    await axios.post('/clients/', {
+    await axios.post('/clients', {
       name: name.value,
       cpf_cnpj: cpf.value,
-      email: email.value,
-      type: type.value,
+      phone: phone.value,
+      balance: 0,
+      limit: 0,
+      status: 'active'
     })
 
     success.value = true
@@ -95,9 +84,5 @@ const createClient = async () => {
   } catch (err) {
     error.value = err?.response?.data?.message || 'Erro ao criar cliente.'
   }
-}
-
-const goToLogin = () => {
-  router.push('/login')
 }
 </script>
