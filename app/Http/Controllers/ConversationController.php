@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Conversation;
 use App\Models\Client;
+use App\Models\Message;
 use Illuminate\Http\Request;
 
 class ConversationController extends Controller
@@ -70,4 +71,24 @@ class ConversationController extends Controller
 
         return response()->json($conversations);
     }
+
+    public function messages($id)
+    {
+        $userId = auth()->id();
+
+        $conversation = Conversation::where('id', $id)
+            ->where(function ($q) use ($userId) {
+                $q->where('sender_id', $userId)
+                ->orWhere('recipient_id', $userId);
+            })->firstOrFail();
+
+        if (!$conversation) {
+          return response()->json(['error' => 'Você não tem acesso a essa conversa.'], 403);
+        }
+
+        $messages = Message::where('conversation_id', $id)->orderBy('created_at')->get();
+
+        return response()->json($messages);
+    }
+
 }

@@ -21,7 +21,7 @@ class Conversation extends Model
         return $this->belongsTo(Client::class, 'sender_id');
     }
 
-    public function client(): BelongsTo
+    public function recipient(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'recipient_id');
     }

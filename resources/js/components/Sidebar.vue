@@ -6,7 +6,7 @@
       <li
         v-for="conversation in conversations"
         :key="conversation.id"
-        @click="goToConversation(conversation.id)"
+        @click="$emit('selectConversation', conversation.id)"
         class="p-3 rounded-lg cursor-pointer hover:bg-green-500/10 transition"
       >
         {{ conversation.name }}
@@ -32,13 +32,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from '../axios'
 
 const conversations = ref([])
 const cpf = ref('')
 const error = ref('')
-const router = useRouter()
 
 const fetchConversations = async () => {
   try {
@@ -61,20 +59,19 @@ const startConversation = async () => {
       cpf_cnpj: cpf.value,
     })
 
-    conversations.value.push({
+    const newConv = {
       id: res.data.conversation_id,
       name: `Conversa com ${cpf.value}`,
-    })
+    }
 
-    router.push(`/chat/${res.data.conversation_id}`)
+    conversations.value.push(newConv)
+
+    emit('selectConversation', newConv.id)
+
+    cpf.value = ''
   } catch (e) {
-    error.value =
-      e?.response?.data?.message || 'Erro ao iniciar conversa'
+    error.value = e?.response?.data?.message || 'Erro ao iniciar conversa'
   }
-}
-
-const goToConversation = (id) => {
-  router.push(`/chat/${id}`)
 }
 
 onMounted(() => {

@@ -28,4 +28,5 @@ Route::prefix('auth')->group(function () {
 Route::prefix('conversations')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [ConversationController::class, 'index']);
     Route::post('/start', [ConversationController::class, 'start']);
+    Route::get('/{id}/messages', [ConversationController::class, 'messages']);
 });
