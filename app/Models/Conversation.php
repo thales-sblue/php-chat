@@ -10,7 +10,7 @@ class Conversation extends Model
 {
     protected $fillable = [
         'sender_id',
-        'client_id',
+        'recipient_id',
         'last_message_content',
         'last_message_time',
         'unread_count',
@@ -23,7 +23,7 @@ class Conversation extends Model
 
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        return $this->belongsTo(Client::class, 'receiver_id');
     }
 
     public function messages(): HasMany

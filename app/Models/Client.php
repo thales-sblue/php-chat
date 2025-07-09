@@ -16,13 +16,23 @@ class Client extends Model
         'status',
     ];
 
-    public function conversations(): HasMany
-    {
-        return $this->hasMany(Conversation::class);
-    }
-
-    public function messages(): HasMany
+    public function sentMessages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'recipient_id');
+    }
+
+    public function conversationsAsSender(): HasMany
+    {
+        return $this->hasMany(Conversation::class, 'sender_id');
+    }
+
+    public function conversationsAsReceiver(): HasMany
+    {
+        return $this->hasMany(Conversation::class, 'receiver_id');
     }
 }

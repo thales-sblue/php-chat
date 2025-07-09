@@ -15,22 +15,30 @@ class ConversationController extends Controller
         ]);
 
         $sender = auth()->user();
-        $receiver = Client::where('cpf_cnpj', $request->cpf_cnpj)->first();
+        $recipient = Client::where('cpf_cnpj', $request->cpf_cnpj)->first();
 
         if (!$sender) {
             return response()->json(['message' => 'Não autenticado.'], 401);
         }
-        if (!$receiver) {
+
+        if (!$recipient) {
             return response()->json(['message' => 'Cliente não encontrado.'], 404);
         }
 
-        $ids = [$sender->id, $receiver->id];
-        sort($ids);
+        $senderId = min($sender->id, $recipient->id);
+        $recipientId = max($sender->id, $recipient->id);
 
-        $conversation = Conversation::firstOrCreate([
-            'sender_id' => min($sender->id, $receiver->id),
-            'receiver_id' => max($sender->id, $receiver->id),
-        ]);
+        $conversation = Conversation::firstOrCreate(
+            [
+                'sender_id' => $senderId,
+                'receiver_id' => $recipientId,
+            ],
+            [
+                'last_message_content' => '',
+                'last_message_time' => now(),
+                'unread_count' => 0,
+            ]
+        );
 
         return response()->json([
             'conversation_id' => $conversation->id
@@ -42,21 +50,24 @@ class ConversationController extends Controller
         $userId = auth()->id();
 
         $conversations = Conversation::where('sender_id', $userId)
-            ->orWhere('receiver_id', $userId)
-            ->with(['sender', 'receiver'])
+            ->orWhere('recipient_id', $userId)
+            ->with(['sender', 'recipient'])
+            ->orderByDesc('last_message_time')
             ->get()
             ->map(function ($conversation) use ($userId) {
                 $other = $conversation->sender_id === $userId
-                    ? $conversation->receiver
+                    ? $conversation->recipient_id
                     : $conversation->sender;
 
                 return [
                     'id' => $conversation->id,
-                    'name' => $other->name ?? 'Desconhecido'
+                    'name' => $other->name ?? 'Desconhecido',
+                    'last_message' => $conversation->last_message_content,
+                    'last_message_time' => $conversation->last_message_time,
+                    'unread_count' => $conversation->unread_count,
                 ];
             });
 
         return response()->json($conversations);
     }
-
 }

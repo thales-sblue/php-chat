@@ -17,8 +17,10 @@ class ClientController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'cpf_cnpj' => 'required|string|unique:clients',
-            'email' => 'required|email|unique:clients',
-            'type' => 'required|in:pre,post',
+            'phone' => 'required|string',
+            'balance' => 'nullable|numeric',
+            'limit' => 'nullable|numeric',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $client = Client::create($validated);
@@ -38,8 +40,10 @@ class ClientController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string',
             'cpf_cnpj' => 'sometimes|required|string|unique:clients,cpf_cnpj,' . $id,
-            'email' => 'sometimes|required|email|unique:clients,email,' . $id,
-            'type' => 'sometimes|required|in:pre,post',
+            'phone' => 'sometimes|required|string',
+            'balance' => 'nullable|numeric',
+            'limit' => 'nullable|numeric',
+            'status' => 'sometimes|required|in:active,inactive',
         ]);
 
         $client->update($validated);

@@ -9,7 +9,7 @@ return new class extends Migration {
         Schema::create('conversations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sender_id')->constrained('clients')->onDelete('cascade');
-            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
+            $table->foreignId('recipient_id')->constrained('clients')->onDelete('cascade');
             $table->text('last_message_content')->nullable();
             $table->timestamp('last_message_time')->nullable();
             $table->integer('unread_count')->default(0);
