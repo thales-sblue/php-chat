@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ConversationController;
 
 
 Route::prefix('clients')->group(function () {
@@ -22,4 +23,8 @@ Route::prefix('messages')->group(function () {
 
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::prefix('conversations')->group(function () {
+    Route::post('/start', [ConversationController::class, 'startConversation']);
 });
