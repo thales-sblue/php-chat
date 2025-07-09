@@ -34,8 +34,8 @@ class Client extends Authenticatable
         return $this->hasMany(Conversation::class, 'sender_id');
     }
 
-    public function conversationsAsReceiver(): HasMany
+    public function conversationsAsRecipient(): HasMany
     {
-        return $this->hasMany(Conversation::class, 'receiver_id');
+        return $this->hasMany(Conversation::class, 'recipient_id');
     }
 }

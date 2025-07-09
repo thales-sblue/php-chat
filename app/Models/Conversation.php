@@ -23,7 +23,7 @@ class Conversation extends Model
 
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Client::class, 'receiver_id');
+        return $this->belongsTo(Client::class, 'recipient_id');
     }
 
     public function messages(): HasMany

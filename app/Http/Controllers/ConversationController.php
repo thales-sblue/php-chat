@@ -31,7 +31,7 @@ class ConversationController extends Controller
         $conversation = Conversation::firstOrCreate(
             [
                 'sender_id' => $senderId,
-                'receiver_id' => $recipientId,
+                'recipient_id' => $recipientId,
             ],
             [
                 'last_message_content' => '',
