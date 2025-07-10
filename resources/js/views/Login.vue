@@ -56,6 +56,7 @@ const login = async () => {
   try {
     const response = await axios.post('/auth/login', { cpf_cnpj: cpf.value })
     localStorage.setItem('token', response.data.token)
+    localStorage.setItem('client_id', response.data.client_id)
     router.push('/home')
   } catch (err) {
     error.value = 'CPF ou CNPJ inválido'

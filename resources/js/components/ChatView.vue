@@ -6,17 +6,15 @@
           <div
             v-for="msg in messages"
             :key="msg.id"
-            :class="{
-              'text-right': msg.from === clientId,
-              'text-left': msg.from !== clientId
-            }"
+            class="flex"
+            :class="msg.sender_id === clientId ? 'justify-end' : 'justify-start'"
           >
             <div
               :class="[
-                'inline-block px-4 py-2 rounded-xl max-w-[70%] break-words',
-                msg.from === clientId
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-700 text-white'
+                'px-4 py-2 rounded-xl max-w-[70%] break-words text-sm',
+                msg.sender_id === clientId
+                  ? 'bg-green-600 text-white rounded-br-none'
+                  : 'bg-gray-700 text-white rounded-bl-none'
               ]"
             >
               {{ msg.content }}
@@ -51,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from '../axios'
 
 const props = defineProps({
@@ -60,11 +58,12 @@ const props = defineProps({
     required: true,
   },
 })
+
 const conversationId = ref(props.conversationId)
 const messages = ref([])
 const newMessage = ref('')
-const clientId = parseInt(localStorage.getItem('client_id'))
 const recipientId = ref(null)
+const clientId = ref(parseInt(localStorage.getItem('client_id')))
 
 const fetchMessages = async () => {
   try {
@@ -95,7 +94,14 @@ const sendMessage = async () => {
   }
 }
 
-onMounted(fetchMessages)
+let interval = null
 
+onMounted(() => {
+  fetchMessages()
+  interval = setInterval(fetchMessages, 3000)
+})
 
+onUnmounted(() => {
+  clearInterval(interval)
+})
 </script>

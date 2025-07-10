@@ -21,6 +21,6 @@ class AuthController extends Controller
 
         $token = $client->createToken('api-token')->plainTextToken;
 
-        return response()->json(['token' => $token]);
+        return response()->json(['token' => $token, 'client_id' => $client->id]);
     }
 }
