@@ -31,8 +31,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineEmits } from 'vue'
 import axios from '../axios'
+
+const emit = defineEmits(['selectConversation'])
 
 const conversations = ref([])
 const cpf = ref('')
@@ -49,25 +51,35 @@ const fetchConversations = async () => {
 
 const startConversation = async () => {
   error.value = ''
-  if (!cpf.value) {
+  const cpfDigitado = cpf.value.trim()
+
+  if (!cpfDigitado) {
     error.value = 'CPF é obrigatório'
+    return
+  }
+
+  const existing = conversations.value.find(conv =>
+    conv.name === `Conversa com ${cpfDigitado}`
+  )
+
+  if (existing) {
+    emit('selectConversation', existing.id)
+    cpf.value = ''
     return
   }
 
   try {
     const res = await axios.post('/conversations/start', {
-      cpf_cnpj: cpf.value,
+      cpf_cnpj: cpfDigitado,
     })
 
     const newConv = {
       id: res.data.conversation_id,
-      name: `Conversa com ${cpf.value}`,
+      name: `Conversa com ${cpfDigitado}`,
     }
 
     conversations.value.push(newConv)
-
     emit('selectConversation', newConv.id)
-
     cpf.value = ''
   } catch (e) {
     error.value = e?.response?.data?.message || 'Erro ao iniciar conversa'

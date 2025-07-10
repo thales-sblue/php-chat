@@ -3,7 +3,7 @@
     <Sidebar @selectConversation="selectedConversationId = $event" />
     <div class="flex-1">
       <component
-        :is="selectedConversationId ? 'ChatView' : 'ChatPlaceholder'"
+        :is="selectedConversationId ? ChatView : ChatPlaceholder"
         :conversation-id="selectedConversationId"
       />
     </div>

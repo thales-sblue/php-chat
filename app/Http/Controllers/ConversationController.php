@@ -58,11 +58,13 @@ class ConversationController extends Controller
             ->map(function ($conversation) use ($userId) {
                 $other = $conversation->sender_id === $userId
                     ? $conversation->recipient_id
-                    : $conversation->sender;
+                    : $conversation->sender_id;
+
+            $other = Client::where('id', $other)->first();
 
                 return [
                     'id' => $conversation->id,
-                    'name' => $other->name ?? 'Desconhecido',
+                    'name' => $other->name,
                     'last_message' => $conversation->last_message_content,
                     'last_message_time' => $conversation->last_message_time,
                     'unread_count' => $conversation->unread_count,
