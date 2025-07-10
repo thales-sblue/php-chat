@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->text('content');
             $table->enum('priority', ['normal', 'urgent'])->default('normal');
             $table->enum('status', ['queued', 'processing', 'sent', 'failed'])->default('queued');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
         });
     }
 

@@ -42,7 +42,9 @@ class ConversationController extends Controller
         );
 
         return response()->json([
-            'conversation_id' => $conversation->id
+            'conversation_id' => $conversation->id,
+            'recipient_id' => $recipientId,
+            'recipient_name' => $recipient->name,
         ]);
     }
 
@@ -64,7 +66,7 @@ class ConversationController extends Controller
 
                 return [
                     'id' => $conversation->id,
-                    'name' => $other->name,
+                    'recipient' => $other,
                     'last_message' => $conversation->last_message_content,
                     'last_message_time' => $conversation->last_message_time,
                     'unread_count' => $conversation->unread_count,
@@ -78,19 +80,29 @@ class ConversationController extends Controller
     {
         $userId = auth()->id();
 
-        $conversation = Conversation::where('id', $id)
+        $conversation = Conversation::with(['sender', 'recipient'])
+            ->where('id', $id)
             ->where(function ($q) use ($userId) {
                 $q->where('sender_id', $userId)
                 ->orWhere('recipient_id', $userId);
             })->firstOrFail();
 
-        if (!$conversation) {
-          return response()->json(['error' => 'Você não tem acesso a essa conversa.'], 403);
-        }
+        $messages = Message::where('conversation_id', $id)
+            ->orderBy('created_at')
+            ->get();
 
-        $messages = Message::where('conversation_id', $id)->orderBy('created_at')->get();
+        $recipient = $conversation->sender_id === $userId
+            ? $conversation->recipient
+            : $conversation->sender;
 
-        return response()->json($messages);
+        return response()->json([
+            'messages' => $messages,
+            'recipient' => [
+                'id' => $recipient->id,
+                'name' => $recipient->name,
+            ],
+        ]);
     }
+
 
 }

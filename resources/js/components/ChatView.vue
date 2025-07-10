@@ -51,12 +51,16 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from '../axios'
-import { useRoute } from 'vue-router'
 
-const route = useRoute()
-const conversationId = ref(route.params.id)
+const props = defineProps({
+  conversationId: {
+    type: [String, Number],
+    required: true,
+  },
+})
+const conversationId = ref(props.conversationId)
 const messages = ref([])
 const newMessage = ref('')
 const clientId = parseInt(localStorage.getItem('client_id'))
@@ -65,23 +69,25 @@ const recipientId = ref(null)
 const fetchMessages = async () => {
   try {
     const res = await axios.get(`/conversations/${conversationId.value}/messages`)
-    messages.value = res.data
 
-    const otherMsg = res.data.find(m => m.from !== clientId)
-    if (otherMsg) recipientId.value = otherMsg.from
+    messages.value = res.data.messages || []
+    recipientId.value = res.data.recipient?.id || ''
   } catch (err) {
     console.error('Erro ao buscar mensagens:', err)
   }
 }
 
 const sendMessage = async () => {
-  if (!newMessage.value.trim()) return
+  if (!newMessage.value.trim() || !recipientId.value) return
 
   try {
-    await axios.post('/messages', {
-      to: recipientId.value,
+    await axios.post('/messages/send', {
+      conversation_id: conversationId.value,
+      recipient_id: recipientId.value,
       content: newMessage.value,
+      priority: 'normal',
     })
+
     newMessage.value = ''
     await fetchMessages()
   } catch (err) {
@@ -91,8 +97,5 @@ const sendMessage = async () => {
 
 onMounted(fetchMessages)
 
-watch(() => route.params.id, (newId) => {
-  conversationId.value = newId
-  fetchMessages()
-})
+
 </script>

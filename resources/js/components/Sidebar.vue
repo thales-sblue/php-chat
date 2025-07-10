@@ -9,7 +9,7 @@
         @click="$emit('selectConversation', conversation.id)"
         class="p-3 rounded-lg cursor-pointer hover:bg-green-500/10 transition"
       >
-        {{ conversation.name }}
+        {{ conversation.recipient.name }}
       </li>
     </ul>
 
@@ -75,7 +75,10 @@ const startConversation = async () => {
 
     const newConv = {
       id: res.data.conversation_id,
-      name: `Conversa com ${cpfDigitado}`,
+      recipient: {
+        id: res.data.recipient_id,
+        name: res.data.recipient_name,
+      },
     }
 
     conversations.value.push(newConv)

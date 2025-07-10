@@ -16,9 +16,9 @@ Route::prefix('clients')->group(function () {
     Route::delete('/{id}', [ClientController::class, 'destroy']);
 });
 
-Route::prefix('messages')->group(function () {
+Route::prefix('messages')->middleware('auth:sanctum')->group(function () {
     Route::get('/', [MessageController::class, 'index']);
-    Route::post('/', [MessageController::class, 'store']);
+    Route::post('/send', [MessageController::class, 'send']);
 });
 
 Route::prefix('auth')->group(function () {
