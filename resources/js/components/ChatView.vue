@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full bg-[#0b0f10] p-4 text-white flex flex-col overflow-hidden">
+  <div class="h-full min-h-0 bg-[#0b0f10] p-4 text-white flex flex-col">
     <div class="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between">
       <div class="space-y-2 overflow-y-auto mb-4 pr-2 flex-1 scrollbar-thin scrollbar-thumb-green-700/30 scrollbar-track-transparent">
         <template v-if="messages.length > 0">
