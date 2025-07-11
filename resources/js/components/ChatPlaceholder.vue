@@ -13,5 +13,5 @@
 </template>
 
 <script setup>
-const token = localStorage.getItem('token')
+const token = sessionStorage.getItem('token')
 </script>
