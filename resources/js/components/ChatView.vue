@@ -63,7 +63,7 @@ const conversationId = ref(props.conversationId)
 const messages = ref([])
 const newMessage = ref('')
 const recipientId = ref(null)
-const clientId = ref(parseInt(localStorage.getItem('client_id')))
+const clientId = ref(parseInt(sessionStorage.getItem('client_id')))
 
 const fetchMessages = async () => {
   try {
