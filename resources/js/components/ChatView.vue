@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
 import axios from '../axios'
 
 const props = defineProps({
@@ -80,7 +80,8 @@ const props = defineProps({
   },
 })
 
-const conversationId = ref(props.conversationId)
+const conversationId = computed(() => props.conversationId)
+
 const messages = ref([])
 const newMessage = ref('')
 const recipientId = ref(null)
@@ -88,6 +89,7 @@ const clientId = ref(parseInt(sessionStorage.getItem('client_id')))
 const messagesContainer = ref(null)
 
 const fetchMessages = async () => {
+  if (!conversationId.value) return
   try {
     const res = await axios.get(`/conversations/${conversationId.value}/messages`)
     messages.value = res.data.messages || []
@@ -122,11 +124,9 @@ watch(messages, async () => {
   }
 })
 
-const formatTimestamp = (timestamp) => {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-}
+watch(conversationId, async () => {
+  await fetchMessages()
+})
 
 let interval = null
 
@@ -138,4 +138,10 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(interval)
 })
+
+const formatTimestamp = (timestamp) => {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
 </script>

@@ -7,9 +7,15 @@
         v-for="conversation in conversations"
         :key="conversation.id"
         @click="$emit('selectConversation', conversation.id)"
-        class="p-3 rounded-lg cursor-pointer hover:bg-green-500/10 transition"
+          class="p-3 rounded-lg cursor-pointer hover:bg-green-500/10 transition flex justify-between items-center"
       >
-        {{ conversation.recipient.name }}
+        <span>{{ conversation.recipient.name }}</span>
+        <span
+          v-if="conversation.unreadCount > 0"
+          class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full"
+        >
+          {{ conversation.unreadCount }}
+        </span>
       </li>
     </ul>
 
@@ -31,7 +37,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue'
+import { ref, onMounted, onUnmounted, defineEmits } from 'vue'
 import axios from '../axios'
 
 const emit = defineEmits(['selectConversation'])
@@ -88,8 +94,14 @@ const startConversation = async () => {
     error.value = e?.response?.data?.message || 'Erro ao iniciar conversa'
   }
 }
+let interval = null
 
 onMounted(() => {
   fetchConversations()
+  interval = setInterval(fetchConversations, 3000)
+})
+
+onUnmounted(() => {
+  clearInterval(interval)
 })
 </script>
