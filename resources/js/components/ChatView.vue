@@ -1,32 +1,49 @@
 <template>
-  <div class="h-full min-h-0 bg-[#0b0f10] p-4 text-white flex flex-col">
-    <div class="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between">
-      <div class="space-y-2 overflow-y-auto mb-4 pr-2 flex-1 scrollbar-thin scrollbar-thumb-green-700/30 scrollbar-track-transparent">
-        <template v-if="messages.length > 0">
-          <div
-            v-for="msg in messages"
-            :key="msg.id"
-            class="flex"
-            :class="msg.sender_id === clientId ? 'justify-end' : 'justify-start'"
-          >
+  <div class="h-screen bg-[#0b0f10] p-4 text-white flex flex-col">
+    <div class="max-w-3xl w-full mx-auto flex flex-col flex-1 min-h-0">
+      <div
+        ref="messagesContainer"
+        class="flex-1 min-h-0 overflow-y-auto pr-2 mb-4 scrollbar-none"
+      >
+        <div class="flex flex-col gap-y-2 min-h-full">
+          <template v-if="messages.length > 0">
             <div
-              :class="[
-                'px-4 py-2 rounded-xl max-w-[70%] break-words text-sm',
-                msg.sender_id === clientId
-                  ? 'bg-green-600 text-white rounded-br-none'
-                  : 'bg-gray-700 text-white rounded-bl-none'
-              ]"
+              v-for="msg in messages"
+              :key="msg.id"
+              class="flex"
+              :class="msg.sender_id === clientId ? 'justify-end' : 'justify-start'"
             >
-              {{ msg.content }}
-            </div>
-          </div>
-        </template>
+              <div
+                class="max-w-[70%] px-4 py-2 rounded-xl break-words text-sm relative"
+                :class="msg.sender_id === clientId
+                  ? 'bg-green-600 text-white rounded-br-none'
+                  : 'bg-gray-700 text-white rounded-bl-none'"
+              >
+                {{ msg.content }}
 
-        <div
-          v-else
-          class="text-center text-gray-400 italic flex items-center justify-center h-full"
-        >
-          Nenhuma mensagem ainda. Envie a primeira!
+                <div class="text-[10px] text-right mt-1 text-gray-300 whitespace-nowrap">
+                  <template v-if="msg.sender_id === clientId">
+                    {{ formatTimestamp(msg.created_at) }} ·
+                    <span v-if="msg.status === 'sent'">✔ Enviado</span>
+                    <span v-else-if="msg.status === 'received'">✔✔ Recebido</span>
+                    <span v-else-if="msg.status === 'read'">✔✔ Lido</span>
+                    <span v-else>⌛ Enviando...</span>
+                  </template>
+                  <template v-else>
+                    {{ formatTimestamp(msg.created_at) }}
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
+            <div
+              class="text-center text-gray-400 italic flex items-center justify-center flex-1"
+            >
+              Nenhuma mensagem ainda. Envie a primeira!
+            </div>
+          </template>
         </div>
       </div>
 
@@ -49,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import axios from '../axios'
 
 const props = defineProps({
@@ -64,11 +81,11 @@ const messages = ref([])
 const newMessage = ref('')
 const recipientId = ref(null)
 const clientId = ref(parseInt(sessionStorage.getItem('client_id')))
+const messagesContainer = ref(null)
 
 const fetchMessages = async () => {
   try {
     const res = await axios.get(`/conversations/${conversationId.value}/messages`)
-
     messages.value = res.data.messages || []
     recipientId.value = res.data.recipient?.id || ''
   } catch (err) {
@@ -92,6 +109,19 @@ const sendMessage = async () => {
   } catch (err) {
     console.error('Erro ao enviar mensagem:', err)
   }
+}
+
+watch(messages, async () => {
+  await nextTick()
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  }
+})
+
+const formatTimestamp = (timestamp) => {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 }
 
 let interval = null
