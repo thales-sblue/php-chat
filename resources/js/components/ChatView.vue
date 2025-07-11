@@ -30,7 +30,11 @@
                     <span v-else>⌛ Enviando...</span>
                   </template>
                   <template v-else>
-                    {{ formatTimestamp(msg.created_at) }}
+                    {{ formatTimestamp(msg.created_at) }} ·
+                    <span v-if="msg.status === 'sent'">✔ Enviado</span>
+                    <span v-else-if="msg.status === 'received'">✔✔ Recebido</span>
+                    <span v-else-if="msg.status === 'read'">✔✔ Lido</span>
+                    <span v-else>⌛ Enviando...</span>
                   </template>
                 </div>
               </div>
