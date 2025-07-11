@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0b0f10] p-4 text-white flex flex-col">
+  <div class="h-full min-h-0 bg-[#0b0f10] p-4 text-white flex flex-col">
     <div class="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between">
       <div class="space-y-2 overflow-y-auto mb-4 pr-2 flex-1 scrollbar-thin scrollbar-thumb-green-700/30 scrollbar-track-transparent">
         <template v-if="messages.length > 0">
@@ -63,7 +63,7 @@ const conversationId = ref(props.conversationId)
 const messages = ref([])
 const newMessage = ref('')
 const recipientId = ref(null)
-const clientId = ref(parseInt(localStorage.getItem('client_id')))
+const clientId = ref(parseInt(sessionStorage.getItem('client_id')))
 
 const fetchMessages = async () => {
   try {
