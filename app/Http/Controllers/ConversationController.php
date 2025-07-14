@@ -2,76 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Conversation;
-use App\Models\Client;
-use App\Models\Message;
+use App\Services\ConversationService;
 use Illuminate\Http\Request;
 
 class ConversationController extends Controller
 {
+    protected ConversationService $conversationService;
+
+    public function __construct(ConversationService $conversationService)
+    {
+        $this->conversationService = $conversationService;
+    }
+
     public function start(Request $request)
     {
         $request->validate([
             'cpf_cnpj' => 'required|string'
         ]);
 
-        $sender = auth()->user();
-        $recipient = Client::where('cpf_cnpj', $request->cpf_cnpj)->first();
+        $senderId = auth()->id();
 
-        if (!$sender) {
-            return response()->json(['message' => 'Não autenticado.'], 401);
+        $result = $this->conversationService->startConversation($request->cpf_cnpj, $senderId);
+
+        if (!$result) {
+            return response()->json(['message' => 'Cliente não encontrado ou usuário não autenticado.'], 404);
         }
 
-        if (!$recipient) {
-            return response()->json(['message' => 'Cliente não encontrado.'], 404);
-        }
-
-        $senderId = min($sender->id, $recipient->id);
-        $recipientId = max($sender->id, $recipient->id);
-
-        $conversation = Conversation::firstOrCreate(
-            [
-                'sender_id' => $senderId,
-                'recipient_id' => $recipientId,
-            ],
-            [
-                'last_message_content' => '',
-                'last_message_time' => now(),
-                'unread_count' => 0,
-            ]
-        );
-
-        return response()->json([
-            'conversation_id' => $conversation->id,
-            'recipient_id' => $recipientId,
-            'recipient_name' => $recipient->name,
-        ]);
+        return response()->json($result);
     }
 
     public function index()
     {
         $userId = auth()->id();
-
-        $conversations = Conversation::where('sender_id', $userId)
-            ->orWhere('recipient_id', $userId)
-            ->with(['sender', 'recipient'])
-            ->orderByDesc('last_message_time')
-            ->get()
-            ->map(function ($conversation) use ($userId) {
-                $other = $conversation->sender_id === $userId
-                    ? $conversation->recipient_id
-                    : $conversation->sender_id;
-
-            $other = Client::where('id', $other)->first();
-
-                return [
-                    'id' => $conversation->id,
-                    'recipient' => $other,
-                    'last_message' => $conversation->last_message_content,
-                    'last_message_time' => $conversation->last_message_time,
-                    'unread_count' => $conversation->unread_count,
-                ];
-            });
+        $conversations = $this->conversationService->getConversations($userId);
 
         return response()->json($conversations);
     }
@@ -80,29 +43,12 @@ class ConversationController extends Controller
     {
         $userId = auth()->id();
 
-        $conversation = Conversation::with(['sender', 'recipient'])
-            ->where('id', $id)
-            ->where(function ($q) use ($userId) {
-                $q->where('sender_id', $userId)
-                ->orWhere('recipient_id', $userId);
-            })->firstOrFail();
+        $result = $this->conversationService->getMessages($id, $userId);
 
-        $messages = Message::where('conversation_id', $id)
-            ->orderBy('created_at')
-            ->get();
+        if (!$result) {
+            return response()->json(['message' => 'Conversa não encontrada ou acesso negado.'], 404);
+        }
 
-        $recipient = $conversation->sender_id === $userId
-            ? $conversation->recipient
-            : $conversation->sender;
-
-        return response()->json([
-            'messages' => $messages,
-            'recipient' => [
-                'id' => $recipient->id,
-                'name' => $recipient->name,
-            ],
-        ]);
+        return response()->json($result);
     }
-
-
 }

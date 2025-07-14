@@ -39,7 +39,7 @@
         </button>
       </form>
 
-      <p v-if="success" class="text-green-400 text-center mt-4">Cliente criado com sucesso!</p>
+      <p v-if="success" class="text-green-400 text-center mt-4">Conta criada com sucesso!</p>
       <p v-if="error" class="text-red-400 text-center mt-4">{{ error }}</p>
     </div>
   </div>
@@ -82,7 +82,7 @@ const createClient = async () => {
       router.push('/login')
     }, 1500)
   } catch (err) {
-    error.value = err?.response?.data?.message || 'Erro ao criar cliente.'
+    error.value = err?.response?.data?.message || 'Erro ao criar conta.'
   }
 }
 </script>

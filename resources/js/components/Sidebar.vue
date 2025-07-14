@@ -11,10 +11,10 @@
       >
         <span>{{ conversation.recipient.name }}</span>
         <span
-          v-if="conversation.unreadCount > 0"
+          v-if="(conversation.unread_count > 0 && clientId !== conversation.sender)"
           class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full"
         >
-          {{ conversation.unreadCount }}
+          {{ conversation.unread_count }}
         </span>
       </li>
     </ul>
@@ -41,7 +41,7 @@ import { ref, onMounted, onUnmounted, defineEmits } from 'vue'
 import axios from '../axios'
 
 const emit = defineEmits(['selectConversation'])
-
+const clientId = ref(parseInt(sessionStorage.getItem('client_id')))
 const conversations = ref([])
 const cpf = ref('')
 const error = ref('')

@@ -2,37 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Message;
+use App\Services\MessageService;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
+    protected MessageService $messageService;
+
+    public function __construct(MessageService $messageService)
+    {
+        $this->messageService = $messageService;
+    }
+
     public function send(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'conversation_id' => 'required|exists:conversations,id',
             'recipient_id' => 'required|exists:clients,id',
             'content' => 'required|string',
             'priority' => 'nullable|in:normal,urgent',
         ]);
 
-        $message = Message::create([
-            'conversation_id' => $request->conversation_id,
-            'sender_id' => auth()->id(),
-            'recipient_id' => $request->recipient_id,
-            'content' => $request->content,
-            'priority' => $request->priority ?? 'normal',
-            'status' => 'queued',
-        ]);
+        $senderId = auth()->id();
+        $message = $this->messageService->send($validated, $senderId);
 
         return response()->json(['message' => $message], 201);
     }
 
     public function list($conversationId)
     {
-        $messages = Message::where('conversation_id', $conversationId)
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $messages = $this->messageService->listByConversation($conversationId);
 
         return response()->json($messages);
     }

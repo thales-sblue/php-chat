@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
+use App\Services\ClientService;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
+    protected ClientService $clientService;
+
+    public function __construct(ClientService $clientService)
+    {
+        $this->clientService = $clientService;
+    }
+
     public function index()
     {
-        return Client::all();
+        return response()->json($this->clientService->all());
     }
 
     public function store(Request $request)
@@ -23,20 +30,18 @@ class ClientController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        $client = Client::create($validated);
+        $client = $this->clientService->create($validated);
         return response()->json($client, 201);
     }
 
     public function show($id)
     {
-        $client = Client::findOrFail($id);
+        $client = $this->clientService->find($id);
         return response()->json($client);
     }
 
     public function update(Request $request, $id)
     {
-        $client = Client::findOrFail($id);
-
         $validated = $request->validate([
             'name' => 'sometimes|required|string',
             'cpf_cnpj' => 'sometimes|required|string|unique:clients,cpf_cnpj,' . $id,
@@ -46,7 +51,7 @@ class ClientController extends Controller
             'status' => 'sometimes|required|in:active,inactive',
         ]);
 
-        $client->update($validated);
+        $client = $this->clientService->update($id, $validated);
         return response()->json($client);
     }
 }
