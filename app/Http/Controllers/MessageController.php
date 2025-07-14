@@ -35,4 +35,16 @@ class MessageController extends Controller
 
         return response()->json($messages);
     }
+
+    public function markRead($id)
+    {
+        $message = $this->messageService->markAsRead($id);
+
+        if (!$message) {
+            return response()->json(['error' => 'Mensagem não encontrada'], 404);
+        }
+
+        return response()->json($message);
+    }
+
 }

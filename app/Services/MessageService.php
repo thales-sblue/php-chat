@@ -43,4 +43,31 @@ class MessageService
             ->orderBy('created_at', 'asc')
             ->get();
     }
+
+    public function markAsSent(int $messageId): ?Message
+    {
+        return $this->updateStatus($messageId, 'sent');
+    }
+
+    public function markAsReceived(int $messageId): ?Message
+    {
+        return $this->updateStatus($messageId, 'received');
+    }
+
+    public function markAsRead(int $messageId): ?Message
+    {
+        return $this->updateStatus($messageId, 'read');
+    }
+
+    protected function updateStatus(int $messageId, string $status): ?Message
+    {
+        $message = Message::find($messageId);
+        if (!$message) return null;
+
+        $message->status = $status;
+        $message->save();
+
+        return $message;
+    }
+
 }
