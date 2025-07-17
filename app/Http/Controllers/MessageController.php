@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\MessageService;
+use App\Jobs\SendMessageJob;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -14,20 +15,21 @@ class MessageController extends Controller
         $this->messageService = $messageService;
     }
 
-    public function send(Request $request)
-    {
-        $validated = $request->validate([
-            'conversation_id' => 'required|exists:conversations,id',
-            'recipient_id' => 'required|exists:clients,id',
-            'content' => 'required|string',
-            'priority' => 'nullable|in:normal,urgent',
-        ]);
+public function send(Request $request)
+{
+    $validated = $request->validate([
+        'conversation_id' => 'required|exists:conversations,id',
+        'recipient_id' => 'required|exists:clients,id',
+        'content' => 'required|string',
+        'priority' => 'nullable|in:normal,urgent',
+    ]);
 
-        $senderId = auth()->id();
-        $message = $this->messageService->send($validated, $senderId);
+    $senderId = auth()->id();
 
-        return response()->json(['message' => $message], 201);
-    }
+    SendMessageJob::dispatch($validated, $senderId);
+
+    return response()->json(['message' => 'Mensagem enviada com sucesso.'], 202);
+}
 
     public function list($conversationId)
     {
