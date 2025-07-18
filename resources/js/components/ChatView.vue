@@ -87,6 +87,7 @@ const newMessage = ref('')
 const recipientId = ref(null)
 const clientId = ref(parseInt(sessionStorage.getItem('client_id')))
 const messagesContainer = ref(null)
+let tempId = 0
 
 const fetchMessages = async () => {
   if (!conversationId.value) return
@@ -100,20 +101,32 @@ const fetchMessages = async () => {
 }
 
 const sendMessage = async () => {
-  if (!newMessage.value.trim() || !recipientId.value) return
+  const content = newMessage.value.trim()
+  if (!content || !recipientId.value) return
+
+  const tempMessage = {
+    id: `temp-${tempId++}`,
+    content: content,
+    sender_id: clientId.value,
+    status: 'pending',
+    created_at: new Date().toISOString(),
+  }
+  messages.value.push(tempMessage)
+  newMessage.value = ''
 
   try {
     await axios.post('/messages/send', {
       conversation_id: conversationId.value,
       recipient_id: recipientId.value,
-      content: newMessage.value,
+      content: content,
       priority: 'normal',
     })
 
-    newMessage.value = ''
     await fetchMessages()
   } catch (err) {
     console.error('Erro ao enviar mensagem:', err)
+    const msg = messages.value.find((m) => m.id === tempMessage.id)
+    if (msg) msg.status = 'error'
   }
 }
 

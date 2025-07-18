@@ -8,22 +8,26 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Container\Attributes\Log;
 
 class SendMessageJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected array $data;
-    protected int $senderId;
+    protected int $messageId;
 
-    public function __construct(array $data, int $senderId)
+    public function __construct(int $messageId)
     {
-        $this->data = $data;
-        $this->senderId = $senderId;
+        $this->messageId = $messageId;
     }
 
     public function handle(MessageService $messageService): void
     {
-        $messageService->send($this->data, $this->senderId);
+        Log::info("Executando job para mensagem {$this->messageId}");
+        $message = $messageService->markAsSent($this->messageId);
+
+        if (!$message) {
+            Log::warning("Mensagem {$this->messageId} não encontrada.");
+        }
     }
 }
