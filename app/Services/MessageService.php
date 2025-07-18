@@ -59,6 +59,21 @@ class MessageService
         return $this->updateStatus($messageId, 'read');
     }
 
+    public function markAllAsReceived(int $userId): void
+    {
+        Message::where('recipient_id', $userId)
+            ->where('status', 'queued')
+            ->update(['status' => 'received']);
+    }
+
+    public function markAllAsRead(int $conversationId, int $userId): void
+    {
+        Message::where('conversation_id', $conversationId)
+            ->where('recipient_id', $userId)
+            ->where('status', '!=', 'read')
+            ->update(['status' => 'read']);
+    }
+
     protected function updateStatus(int $messageId, string $status): ?Message
     {
         $message = Message::find($messageId);
@@ -69,5 +84,4 @@ class MessageService
 
         return $message;
     }
-
 }

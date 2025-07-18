@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ConversationService;
+use App\Services\ChatService;
 use Illuminate\Http\Request;
 
 class ConversationController extends Controller
 {
-    protected ConversationService $conversationService;
+    protected ChatService $chatService;
 
-    public function __construct(ConversationService $conversationService)
+    public function __construct(ChatService $chatService)
     {
-        $this->conversationService = $conversationService;
+        $this->chatService = $chatService;
     }
 
     public function start(Request $request)
@@ -22,7 +22,7 @@ class ConversationController extends Controller
 
         $senderId = auth()->id();
 
-        $result = $this->conversationService->startConversation($request->cpf_cnpj, $senderId);
+        $result = $this->chatService->startConversation($request->cpf_cnpj, $senderId);
 
         if (!$result) {
             return response()->json(['message' => 'Cliente não encontrado ou usuário não autenticado.'], 404);
@@ -34,7 +34,7 @@ class ConversationController extends Controller
     public function index()
     {
         $userId = auth()->id();
-        $conversations = $this->conversationService->getConversations($userId);
+        $conversations = $this->chatService->getUserConversations($userId);
 
         return response()->json($conversations);
     }
@@ -43,7 +43,7 @@ class ConversationController extends Controller
     {
         $userId = auth()->id();
 
-        $result = $this->conversationService->getMessages($id, $userId);
+        $result = $this->chatService->getMessages($id, $userId);
 
         if (!$result) {
             return response()->json(['message' => 'Conversa não encontrada ou acesso negado.'], 404);

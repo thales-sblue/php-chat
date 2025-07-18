@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\MessageService;
+use App\Services\ChatService;
 use App\Jobs\SendMessageJob;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
-    protected MessageService $messageService;
+    protected ChatService $chatService;
 
-    public function __construct(MessageService $messageService)
+    public function __construct(ChatService $chatService)
     {
-        $this->messageService = $messageService;
+        $this->chatService = $chatService;
     }
 
     public function send(Request $request)
@@ -25,7 +25,7 @@ class MessageController extends Controller
         ]);
 
         $senderId = auth()->id();
-        $message = $this->messageService->send($validated, $senderId);
+        $message = $this->chatService->sendMessage($validated, $senderId);
 
         SendMessageJob::dispatch($message->id);
 
@@ -34,14 +34,13 @@ class MessageController extends Controller
 
     public function list($conversationId)
     {
-        $messages = $this->messageService->listByConversation($conversationId);
-
+        $messages = $this->chatService->listMessagesByConversation($conversationId);
         return response()->json($messages);
     }
 
     public function markRead($id)
     {
-        $message = $this->messageService->markAsRead($id);
+        $message = $this->chatService->markMessageAsRead($id);
 
         if (!$message) {
             return response()->json(['error' => 'Mensagem não encontrada'], 404);
@@ -49,5 +48,4 @@ class MessageController extends Controller
 
         return response()->json($message);
     }
-
 }
