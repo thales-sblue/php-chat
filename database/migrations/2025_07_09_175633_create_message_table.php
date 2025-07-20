@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->foreignId('recipient_id')->constrained('clients')->onDelete('cascade');
             $table->text('content');
             $table->enum('priority', ['normal', 'urgent'])->default('normal');
-            $table->enum('status', ['queued', 'processing', 'sent', 'failed'])->default('queued');
+            $table->enum('status', ['queued', 'processing', 'sent', 'received', 'read', 'failed'])->default('queued');
             $table->timestamps();
         });
     }
